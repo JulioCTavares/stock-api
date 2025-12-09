@@ -1,9 +1,7 @@
 import type { IUserRepository } from "@/infrastructure/repositories/user/user.repository";
 import type { ICache } from "@/infrastructure/cache/interfaces/cache.interface";
 import { UserEntity } from "@/domain/entities/user.entity";
-import { logger } from "@/utils/logger";
-
-const ONE_DAY_SECONDS = 60 * 60 * 24;
+import { logger, CACHE_KEYS, CACHE_TTL } from "@/utils";
 
 export class UserRepositoryProxy implements IUserRepository {
   constructor(private readonly userRepository: IUserRepository, private readonly cache: ICache) {}
@@ -11,7 +9,7 @@ export class UserRepositoryProxy implements IUserRepository {
   private async cacheGetOrSet<T>(
     key: string,
     fetcher: () => Promise<T | null>,
-    ttlSeconds = ONE_DAY_SECONDS
+    ttlSeconds = CACHE_TTL.ONE_DAY
   ): Promise<T | null> {
     const cached = await this.cache.get(key);
     if (cached) {
@@ -35,15 +33,15 @@ export class UserRepositoryProxy implements IUserRepository {
   }
 
   private keyByEmail(email: string): string {
-    return `user:email:${email}`;
+    return CACHE_KEYS.USER_BY_EMAIL(email);
   }
 
   private keyById(id: string): string {
-    return `user:id:${id}`;
+    return CACHE_KEYS.USER_BY_ID(id);
   }
 
   private keyAll(params?: { limit?: number; offset?: number }): string {
-    return `users:all:${params?.limit}:${params?.offset}`;
+    return `users:all:${params?.limit ?? ""}:${params?.offset ?? ""}`;
   }
 
   async findByEmail(email: string): Promise<UserEntity | null> {
@@ -77,7 +75,7 @@ export class UserRepositoryProxy implements IUserRepository {
     }
 
     const users = await this.userRepository.findAll(params);
-    await this.cache.set(key, JSON.stringify(users.map((user) => new UserEntity(user))), ONE_DAY_SECONDS);
+    await this.cache.set(key, JSON.stringify(users.map((user) => new UserEntity(user))), CACHE_TTL.ONE_DAY);
     return users;
   }
 

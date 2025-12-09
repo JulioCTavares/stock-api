@@ -6,7 +6,7 @@ import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { userTable } from "../schemas/user";
 import { UserMapper } from "../mappers/userMapper";
 import { desc, eq, sql } from "drizzle-orm";
-import { logger } from "@/utils/logger";
+import { logger, now, PAGINATION } from "@/utils";
 
 const SELECT_FIELDS = {
   id: userTable.id,
@@ -23,7 +23,7 @@ export class UserDrizzleRepository implements IUserRepository {
 
   async save(user: UserEntity): Promise<UserEntity> {
     logger.info(`Saving user ${user.username} to database`);
-    const now = new Date();
+    const currentDate = now();
     const [newUser] = await this.db
       .insert(userTable)
       .values({
@@ -32,8 +32,8 @@ export class UserDrizzleRepository implements IUserRepository {
         email: user.email,
         password: user.password,
         role: user.role,
-        createdAt: user.createdAt ?? now,
-        updatedAt: user.updatedAt ?? now
+        createdAt: user.createdAt ?? currentDate,
+        updatedAt: user.updatedAt ?? currentDate
       })
       .returning(SELECT_FIELDS);
 
@@ -65,7 +65,7 @@ export class UserDrizzleRepository implements IUserRepository {
   }
 
   async findAll(params?: { limit?: number; offset?: number }): Promise<UserEntity[]> {
-    const { limit = 50, offset = 0 } = params ?? {};
+    const { limit = PAGINATION.DEFAULT_LIMIT, offset = 0 } = params ?? {};
 
     const query = this.db
       .select(SELECT_FIELDS)
@@ -87,7 +87,7 @@ export class UserDrizzleRepository implements IUserRepository {
         email: user.email,
         password: user.password,
         role: user.role,
-        updatedAt: new Date()
+        updatedAt: now()
       })
       .where(eq(userTable.id, user.id))
       .returning(SELECT_FIELDS);

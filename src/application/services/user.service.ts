@@ -2,6 +2,7 @@ import type { IUserRepository } from "@/infrastructure/repositories/user/user.re
 import type { IHashStrategy } from "@/infrastructure/hash/hashStrategy";
 import { UserEntity } from "@/domain/entities/user.entity";
 import { randomUUID } from "crypto";
+import { USER_ROLES, NotFoundError, now } from "@/utils";
 
 type CreateUserInput = {
   username: string;
@@ -18,14 +19,15 @@ export class UserService {
 
   async create(input: CreateUserInput): Promise<UserEntity> {
     const hashed = await this.hashStrategy.hash(input.password);
+    const currentDate = now();
     const user = new UserEntity({
       id: randomUUID(),
       username: input.username,
       email: input.email,
       password: hashed,
-      role: input.role ?? "user",
-      createdAt: new Date(),
-      updatedAt: new Date()
+      role: input.role ?? USER_ROLES.USER,
+      createdAt: currentDate,
+      updatedAt: currentDate
     } as UserEntity);
 
     return this.userRepository.save(user);
@@ -53,11 +55,11 @@ export class UserService {
   async updatePassword(id: string, newPassword: string): Promise<UserEntity> {
     const user = await this.userRepository.findById(id);
     if (!user) {
-      throw new Error("User not found");
+      throw new NotFoundError("Usuário não encontrado");
     }
     const hashed = await this.hashStrategy.hash(newPassword);
     user.password = hashed;
-    user.updatedAt = new Date();
+    user.updatedAt = now();
     return this.userRepository.update(user);
   }
 
