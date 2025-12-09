@@ -49,6 +49,7 @@ export class UserRepositoryProxy implements IUserRepository {
     return this.cacheGetOrSet<UserEntity>(
       this.keyByEmail(email),
       async () => {
+        logger.info("Retriving data from database")
         const user = await this.userRepository.findByEmail(email);
         return user ? new UserEntity(user) : null;
       }

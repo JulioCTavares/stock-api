@@ -4,6 +4,7 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import { FastifyResponseHelper } from "@/utils/response-fastify";
 import { handleError } from "@/utils/errorHandler";
 import { HTTP_STATUS } from "@/utils/constants";
+import { logger } from "@/utils";
 
 export class RegisterUserController {
     constructor(private readonly registerUserUseCase: RegisterUserUseCase) {}
@@ -11,6 +12,7 @@ export class RegisterUserController {
     async handle(req: FastifyRequest, res: FastifyReply): Promise<FastifyReply> {
         try {
             const { username, email, password } = req.body as RegisterUserInput;
+            logger.info("Sending body to use case")
             const user = await this.registerUserUseCase.execute({ username, email, password });
             return FastifyResponseHelper.created(res, user, "Usuário criado com sucesso");
         } catch (error) {

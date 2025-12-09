@@ -8,9 +8,9 @@ export class RegisterUserUseCase {
     constructor(private readonly userService: UserService) {}
 
     async execute(input: RegisterUserInput): Promise<UserEntity> {
+        logger.info("Reciving data and initialize use case")
         logger.debug({ email: input.email }, "Iniciando registro de usuário");
 
-        // Validação de entrada
         let validated: RegisterUserInput;
         try {
             validated = registerUserInputSchema.parse(input);
@@ -24,14 +24,12 @@ export class RegisterUserUseCase {
             throw new ValidationError("Erro ao validar dados de entrada");
         }
 
-        // Verificar se o usuário já existe
         const existingUser = await this.userService.findByEmail(validated.email);
         if (existingUser) {
             logger.warn({ email: validated.email }, "Tentativa de registro com email já existente");
             throw new ConflictError("Email já está em uso");
         }
 
-        // Criar usuário
         try {
             const user = await this.userService.create(validated);
             logger.info({ userId: user.id, email: user.email }, "Usuário registrado com sucesso");
