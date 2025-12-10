@@ -1,5 +1,6 @@
 import { UserEntity } from "@/domain/entities/user.entity";
 import type { userTable } from "../schemas/user";
+import type { UserOutput } from "@/application/dtos/users/userOutput";
 
 
 
@@ -24,6 +25,17 @@ export class UserMapper {
             email: user.email,
             password: user.password,
             role: user.role,
+        };
+    }
+
+    static toOutput(user: UserEntity): UserOutput {
+        return {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            role: user.role,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt
         };
     }
 }

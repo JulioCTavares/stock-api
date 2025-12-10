@@ -5,6 +5,7 @@ import { FastifyResponseHelper } from "@/utils/response-fastify";
 import { handleError } from "@/utils/errorHandler";
 import { HTTP_STATUS } from "@/utils/constants";
 import { logger } from "@/utils";
+import { UserMapper } from "@/infrastructure/db/drizzle/mappers/userMapper";
 
 export class RegisterUserController {
     constructor(private readonly registerUserUseCase: RegisterUserUseCase) {}
@@ -14,7 +15,8 @@ export class RegisterUserController {
             const { username, email, password } = req.body as RegisterUserInput;
             logger.info("Sending body to use case")
             const user = await this.registerUserUseCase.execute({ username, email, password });
-            return FastifyResponseHelper.created(res, user, "Usuário criado com sucesso");
+            const userOutput = UserMapper.toOutput(user);
+            return FastifyResponseHelper.created(res, userOutput, "Usuário criado com sucesso");
         } catch (error) {
             const errorResponse = handleError(error);
             const errorData = await errorResponse.json();
