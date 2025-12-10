@@ -15,7 +15,9 @@ const envSchema = z.object({
   REDIS_PASSWORD: z.string().optional(),
   REDIS_URL: z.string().optional(),
   RABBITMQ_PORT: z.coerce.number().default(5672),
-  RABBITMQ_MANAGEMENT_PORT: z.coerce.number().default(15672)
+  RABBITMQ_MANAGEMENT_PORT: z.coerce.number().default(15672),
+  JWT_SECRET: z.string(),
+  JWT_EXPIRES_IN: z.coerce.number().default(60 * 60 * 24 * 30),
 });
 
 const parsedEnv = envSchema.parse(config().parsed);

@@ -33,7 +33,11 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@fastify/auth": "^5.0.4",
+    "@fastify/bearer-auth": "^10.1.2",
     "@fastify/cors": "^11.1.0",
+    "@fastify/helmet": "^13.0.2",
+    "@fastify/jwt": "^10.0.0",
     "argon2": "^0.44.0",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.0",
